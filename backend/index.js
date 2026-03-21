@@ -3,6 +3,8 @@ import cors from "cors";
 import "dotenv/config";
 import connectDB from "./config/db.js";
 import userRouter from "./router/userRoutes.js";
+import resumeRouter from "./router/reumeRoutes.js";
+import aiRouter from "./router/aiRoutes.js";
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -17,6 +19,8 @@ await connectDB();
 app.get("/", (req, res) => {
   res.send("Welcome to backend api");
 });
-app.use("/api/users", userRouter)
+app.use("/api/users", userRouter);
+app.use("/api/resumes", resumeRouter);
+app.use("/api/ai", aiRouter);
 
 app.listen(PORT, () => console.log(`Server is running on port: ${PORT}`));
