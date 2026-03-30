@@ -1,9 +1,16 @@
 import { useState } from "react";
+import api from "../config/api";
+import { useDispatch } from "react-redux";
+import { login } from "../app/features/authSlice";
+import toast from "react-hot-toast";
+
 
 const Login = () => {
+  const dispatch = useDispatch()
+
   const query = new URLSearchParams(window.location.search);
   const urlState = query.get("state");
-    const [state, setState] = useState(urlState || "login");
+  const [state, setState] = useState(urlState || "login");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -11,8 +18,16 @@ const Login = () => {
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const {data} = await api.post(`/api/users/${state}`, formData)
+      dispatch(login(data))
+      localStorage.setItem('token', data.token)
+      toast.success(data.message)
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message)
+    }
   };
 
   const handleChange = (e) => {
@@ -25,6 +40,7 @@ const Login = () => {
       <form
         onSubmit={handleSubmit}
         className="sm:w-87.5 w-full text-center border border-gray-300/60 rounded-2xl px-8 bg-white"
+        autoComplete="off"
       >
         <h1 className="text-gray-900 text-3xl mt-10 font-medium">
           {state === "login" ? "Login" : "Sign up"}

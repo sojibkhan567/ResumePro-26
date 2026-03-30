@@ -43,13 +43,14 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(req.body);
     //check if required fields are present
     if (!email || !password) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     //check if user exists
-    const user = await User.findOne({ email }).select("-password");
+    const user = await User.findOne({ email });
     if (!user) {
       res.status(400).json({ message: "Invalid credentials" });
     }
