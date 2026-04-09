@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { dummyResumeData } from "../assets/assets";
 import {
   ArrowLeftIcon,
   Briefcase,
@@ -25,9 +24,13 @@ import ExprienceForm from "../components/ExprienceForm";
 import EducationForm from "../components/EducationForm";
 import ProjectForm from "../components/ProjectForm";
 import SkillsForm from "../components/SkillsForm";
+import { useSelector } from "react-redux";
+import api from "../config/api";
+import toast from "react-hot-toast";
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
+  const {token} = useSelector(state => state.auth)
 
   // initialize resume data
   const [resumeData, setResumeData] = useState({
@@ -46,10 +49,14 @@ const ResumeBuilder = () => {
 
   // load existing resume data from backend
   const loadExistingResume = async () => {
-    const resume = dummyResumeData.find((resume) => resume._id === resumeId);
-    if (resume) {
-      setResumeData(resume);
-      document.title = resume.title;
+    try {
+      const {data} = await api.get(`/api/resumes/get/${resumeId}`, {headers: {Authorization: token}})
+      if (data.resume) {
+        setResumeData(data.resume)
+        document.title = data.resume.title
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message);
     }
   };
 
@@ -69,7 +76,18 @@ const ResumeBuilder = () => {
 
   // change resume visibility btn
   const changeResumeVisibility = async () => {
-    setResumeData({...resumeData, public: !resumeData.public});
+    try {
+      const formData = new FormData()
+      formData.append("resumeId", resumeId)
+      formData.append("resumeData", JSON.stringify({public: !resumeData.public}))
+  
+      const {data} = await api.put('/api/resumes/update', formData, {headers: {Authorization: token}})
+
+      setResumeData({...resumeData, public: !resumeData.public})
+      toast.success(data.message)
+    } catch (error) {
+      console.log("Error saving resume: ", error)
+    }
   }
   // handle share btn function
   const handleShare = () => {

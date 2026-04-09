@@ -66,7 +66,7 @@ export const uploadResume = async (req, res) => {
   try {
     const { resumeText, title } = req.body;
     const userId = req.userId;
-
+    
     if (!resumeText) {
       return res.status(400).json({ message: "Missing required fields" });
     }
